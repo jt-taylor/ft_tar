@@ -6,32 +6,69 @@
 /*   By: zkubli <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 11:28:42 by zkubli            #+#    #+#             */
-/*   Updated: 2020/02/15 15:33:53 by zkubli           ###   ########.fr       */
+/*   Updated: 2020/02/16 03:00:16 by zkubli           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <diren
 #include <sys/stat.h>
 #include <string.h>
 #include "archive.h"
 
 /*
-** Returns index of last forward slash in string, -1 if no slash found.
+** returns -1 if whole file can fit in name[100]
+** otherwise returns index of last slash to be put in the prefix.
 */
 
-static int	last_slash(char *str)
+static int	get_split(char *str)
 {
 	int i;
 	int re_val;
 
-	i = 0;
+	i = strlen(str);
+	if (i < 100)
+		return (-1);
 	re_val = -1;
-	while (str[i])
+	while (i >= 0)
 	{
 		if (str[i] == '/')
 			re_val = i;
-		i++;
+		i--;
 	}
 	return (re_val);
+}
+
+static int	checksum(char *path)
+{
+	DIR				my_dir;
+	struct reader	my_reader;
+
+	my_dir = opendir(path);
+}
+
+static char	get_link(struct stat *stats, char *path_to_file)
+{
+	static t_hashnode	*table[HASH_SIZE];
+	char				*tmp;
+
+	if ((tmp = table_checkadd(table, stats->st_ino)))
+	{
+		strncpy(path_to_file, tmp, 100);
+		return ('1');
+	}
+	else
+		bzero(path_to_file, 100);
+	if ((stats->st_mode & ST_IFMT) == ST_IFLNK)
+		return ('2');
+	if ((stats->st_mode & ST_IFMT) == ST_IFCHR)
+		return ('3');
+	if ((stats->st_mode & ST_IFMT) == ST_IFBLK)
+		return ('4');
+	if ((stats->st_mode & ST_IFMT) == ST_IFDIR)
+		return ('5');
+	if ((stats->st_mode & ST_IFMT) == ST_IFIFO)
+		return ('6');
+	return ('0');
 }
 
 /*
@@ -43,29 +80,24 @@ static int	last_slash(char *str)
 ** zeros any unused space.
 **
 */
-void		path_to_tar(char *path, t_tar *tar)
+void		path_to_tar_header(char *path, t_tar *tar)
 {
 	int			split;
+	char		*tmp;
 	struct stat	my_stat;
 
 	split = last_slash(path) + 1;
 	bzero(stpncpy(tar->file_name_prefix, path, split), 155 - split);
 	strncpy(tar->file_name, path + split, 100);
 	stat(path, &my_stat);
-	memcpy(&tar->file_mode, &my_stat.st_mode, 8);
-	memcpy(&tar->owner_id, &my_stat.st_uid, 8);
-	memcpy(&tar->group_id, &my_stat.st_gid, 8);
-	memcpy(&tar->file_size, &my_stat.st_size, 12);
-	//final time is 12 bytes
-	//st_mtime is 8 bytes, st_mtimespec is 16, which to use?
-	memcpy(&tar->last_mode_time, &my_stat.st_mtime, 8);
-	memcpy(&tar->last_mode_time + 8, &my_stat.st_mtimespec + 4, 4);
-	//first 8 of mtime and last 4 of mtimespec ?
-	//4 bytes covers all nanoseconds so I guess this makes sense
-	memcpy(&tar->file_mode, &my_stat.st_mode, 8);
-	bzero(&tar->checksum, 8);
-	tar->file_type = ((my_stat.st_mode & ST_IFMT) == ST_IFLNK);
-	if (tar->file_type)
+	snprintf(tar->file_mode, "6o ", my_stat.st_mode, 7);
+	snprintf(tar->owner_id, "6o ", my_stat.st_uid, 7);
+	snprintf(tar->group_id, "6o ", my_stat.st_gid, 7);
+	snprintf(tar->file_size, "11o ", my_stat.st_gid, 12);
+	snprintf(tar->last_mod_time, "11o ", my_stat.st_gid, 12);
+	snprintf(tar->checksum, "            ", my_stat.st_gid, 12);
+	tmp = ((my_sta);
+	if (tar->)
 
 
 }
