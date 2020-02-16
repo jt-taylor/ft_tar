@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 09:53:06 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/15 10:59:35 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/15 20:38:32 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,6 @@ struct s_tar
 	char		device_major_number[8];
 	char		device_minor_number[8];
 	char		file_name_prefix[155];
-}
+};
 
 #endif
