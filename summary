@@ -1,0 +1,30 @@
+Summary:
+1. Recode "tar"
+2. Make it work
+3. ???
+4. Profit!
+
+V1.1
+	Twitter task
+V2.1
+	ft_archive
+	ft_unarchive
+V2.2
+	Recursive ft_archive
+V2.3
+	make ft_tar with archive unarchive capabilities
+	also need the following flags
+		-x		extract to disk from the archive
+		-c		create a new archive
+		-v		verbose output (list each name as written to or from archive)
+					additional -v options produce additional output
+		-f		read or write the archive to file ([-] goes to stdout// stdin)
+		-t		list archive to stdout
+		-p		manage permissions and dates (ustar format)
+V2.4
+	compatablity with the system tar
+V2.5
+	implement the -z option , this is just pipeing through gzip , ignored in extract mode
+	this would only be an issue if you are storing the archive in something
+		like a linked list , if you're making the header then sending that and the file
+		to the file this should be simple to implement
