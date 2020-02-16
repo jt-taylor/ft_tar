@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 17:29:55 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/15 23:01:33 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/15 23:14:46 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,9 +178,6 @@ static void	read_file_entry(t_untar *s)
 		}
 		s->file_size -= 512;
 	}
-	if (s->f)
-		fclose(s->f);
-	s->f = 0;
 }
 
 /*
@@ -280,9 +277,11 @@ static void	untar(t_untar *s, const char *path)
 		while (s->file_size > 0)
 		{
 			s->bytes_read = fread(s->buffer, 1, 512, s->ar);
-			while (s->file_size > 0)
-				read_file_entry(s);
+			read_file_entry(s);
 		}
+		if (s->f)
+			fclose(s->f);
+		s->f = 0;
 	}
 }
 
