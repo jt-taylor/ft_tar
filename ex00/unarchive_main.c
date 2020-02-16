@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 17:29:55 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/15 22:49:28 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/15 23:01:33 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ static int		cheap_mkdir_inner(char *path_name, const unsigned int perm_bits)
 static void		cheap_mkdir(char *dir_name, const unsigned int perm_bits)
 {
 	int					i;
-	size_t		dir_len;
+	size_t				dir_len;
 	char				*path;
 
 	i = 0;
@@ -104,6 +104,7 @@ static FILE		*cheap_make_file(char *path_name, const unsigned int perm_bits)
 	}
 	return (f);
 }
+
 /*
 ** mostly for the checksum
 ** we need to give it a len because there is no padding in the tar headers
@@ -129,7 +130,9 @@ static int	cheap_atoo(const char *str, int num_len)
 
 static void	handle_file_type(t_untar *s)
 {
-	char		opt = s->buffer[156];
+	char		opt;
+
+	opt = s->buffer[156];
 	if (opt == 1)
 		printf("Ignore Hardlink\n");
 	else if (opt == 2)
@@ -164,7 +167,7 @@ static void	read_file_entry(t_untar *s)
 		return ;
 	}
 	if (s->file_size < 512)
-		s->bytes_read = 512; // stay aligned to the blocks
+		s->bytes_read = 512;
 	if (s->f != 0)
 	{
 		if (fwrite(s->buffer, 1, s->bytes_read, s->f) != s->bytes_read)
@@ -176,7 +179,7 @@ static void	read_file_entry(t_untar *s)
 		s->file_size -= 512;
 	}
 	if (s->f)
-		fclose(s->f);//close if open
+		fclose(s->f);
 	s->f = 0;
 }
 
@@ -200,7 +203,6 @@ static int	check_if_block_not_empty(t_untar *s)
 	}
 	return (0);
 }
-
 
 /*
 ** from the gnu tar manual
@@ -249,6 +251,13 @@ static int	get_checksum(t_untar *s)
 /*
 ** go through the tar entries and make the file from them
 ** read blocks at a time
+** infin loop
+** 	read from archive
+** 	if empty break out of loop
+** 	validate checksum
+** 	handle filetype
+**	while filesize
+**		write file
 */
 
 static void	untar(t_untar *s, const char *path)
@@ -257,17 +266,17 @@ static void	untar(t_untar *s, const char *path)
 	while (1)
 	{
 		s->bytes_read = fread(s->buffer, 1, 512, s->ar);
-		if (s->bytes_read < 512) // not sure if this will ever run
+		if (s->bytes_read < 512)
 		{
 			fprintf(stderr, "Block misalignment:: less than 512 bytes read\n");
 			return ;
 		}
-		if (!check_if_block_not_empty(s))//check end of archive;// tar denotes this with a completely empty bloc
+		if (!check_if_block_not_empty(s))
 			return ;
-		if (get_checksum(s) == 0)// if this fails then indicate file corruption
+		if (get_checksum(s) == 0)
 			return ;
-		s->file_size = cheap_atoo(&s->buffer[124], 12);//parse filesize from octal number ;
-		handle_file_type(s);//switch case to handle the filetypes ie HARDLINK // symlink // block //char device // fifo
+		s->file_size = cheap_atoo(&s->buffer[124], 12);
+		handle_file_type(s);
 		while (s->file_size > 0)
 		{
 			s->bytes_read = fread(s->buffer, 1, 512, s->ar);
@@ -283,8 +292,9 @@ static void	untar(t_untar *s, const char *path)
 
 static void	init_untar_struct(t_untar *s)
 {
-	int		i = 0;
+	int		i;
 
+	i = 0;
 	while (i < 512)
 	{
 		s->buffer[i] = 0;

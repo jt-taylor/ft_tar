@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 17:46:58 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/15 22:18:16 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/15 22:55:55 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <errno.h>
 
 # ifndef UN_TAR
-# define UN_TAR
+#  define UN_TAR
 
 typedef struct			s_untar
 {
