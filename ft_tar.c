@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 23:39:47 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/16 20:40:37 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/16 21:54:20 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,4 +97,8 @@ int					main(int ac, char **argv)
 	ft_tar_get_options(&tar, ac, argv);
 	if (tar.opt_x || tar.opt_t)
 		untar_handle(&tar);
+	else if (tar.opt_c == 1 && tar.opt_f)
+		archive(tar.opt_f_target, tar.argv);
+	else
+		perror("missing input arguments");
 }
