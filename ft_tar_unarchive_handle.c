@@ -6,13 +6,13 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/16 16:39:46 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/16 20:13:36 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/16 20:35:55 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "dearchive.h"
 
-void		untar_handle(t_ft_tar *tar)
+void			untar_handle(t_ft_tar *tar)
 {
 	struct s_untar		s;
 
@@ -26,7 +26,6 @@ void		untar_handle(t_ft_tar *tar)
 		exit(1);
 	}
 	untar_handle_mode(tar, &s);
-	//untar func
 	if (s.ar != stdin)
 		fclose(s.ar);
 }
@@ -68,7 +67,8 @@ void			read_file_entry(t_untar *s)
 		s->bytes_read = 512;
 	if (s->f != 0)
 	{
-		if (s->to_write && fwrite(s->buffer, 1, s->bytes_read, s->f) != s->bytes_read)
+		if (s->to_write && fwrite(s->buffer, 1, s->bytes_read, s->f)
+				!= s->bytes_read)
 		{
 			fprintf(stderr, "Failed fwrite\n");
 			if (s->f != stdout)

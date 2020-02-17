@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/16 15:39:36 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/16 19:53:40 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/16 20:34:10 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 /*
 ** these are mostly yanked from the ft_unarchive program in the ex00 dir
-** because these don't reall need to be updated for the new flags, just 
+** because these don't reall need to be updated for the new flags, just
 ** libc mkdir applies the umask of the owner of the process calling it,
 ** so you only make files with less permissions than what the calling process
 ** the permissions are stored in the mode offset of the header
