@@ -6,25 +6,34 @@
 /*   By: zkubli <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 11:28:42 by zkubli            #+#    #+#             */
-/*   Updated: 2020/02/16 03:00:16 by zkubli           ###   ########.fr       */
+/*   Updated: 2020/02/16 21:38:49 by zkubli           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <diren
+#include <stdio.h>
+#include <grp.h>
+#include <pwd.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
 #include "archive.h"
 
 /*
-** returns -1 if whole file can fit in name[100]
+** returns -1 if whole file:wq can fit in name[100]
 ** otherwise returns index of last slash to be put in the prefix.
 */
 
-static int	get_split(char *str)
+static int	get_split(char **path)
 {
-	int i;
-	int re_val;
+	char	*str;
+	int		i;
+	int		re_val;
 
+	if (**path == '~')
+		(*path)++;
+	if (**path == '/')
+		(*path)++;
+	str = *path;
 	i = strlen(str);
 	if (i < 100)
 		return (-1);
@@ -38,66 +47,85 @@ static int	get_split(char *str)
 	return (re_val);
 }
 
-static int	checksum(char *path)
+static int	checksum(t_tar *header)
 {
-	DIR				my_dir;
-	struct reader	my_reader;
+	int i;
+	int	total;
 
-	my_dir = opendir(path);
+	total = 0;
+	i = 0;
+	while (i < 512)
+	{
+		total += ((unsigned char *)(header))[i];
+		i++;
+	}
+	return (total);
 }
 
-static char	get_link(struct stat *stats, char *path_to_file)
+static char	get_link(struct stat *stats, char *l_name)
 {
 	static t_hashnode	*table[HASH_SIZE];
 	char				*tmp;
 
-	if ((tmp = table_checkadd(table, stats->st_ino)))
+	if ((tmp = table_checkadd(table, stats->st_ino, l_name)))
 	{
-		strncpy(path_to_file, tmp, 100);
+		strncpy(l_name, tmp, 100);
 		return ('1');
 	}
 	else
-		bzero(path_to_file, 100);
-	if ((stats->st_mode & ST_IFMT) == ST_IFLNK)
+		bzero(l_name, 100);
+	if ((stats->st_mode & S_IFMT) == S_IFLNK)
 		return ('2');
-	if ((stats->st_mode & ST_IFMT) == ST_IFCHR)
+	if ((stats->st_mode & S_IFMT) == S_IFCHR)
 		return ('3');
-	if ((stats->st_mode & ST_IFMT) == ST_IFBLK)
+	if ((stats->st_mode & S_IFMT) == S_IFBLK)
 		return ('4');
-	if ((stats->st_mode & ST_IFMT) == ST_IFDIR)
+	if ((stats->st_mode & S_IFMT) == S_IFDIR)
 		return ('5');
-	if ((stats->st_mode & ST_IFMT) == ST_IFIFO)
+	if ((stats->st_mode & S_IFMT) == S_IFIFO)
 		return ('6');
 	return ('0');
+}
+
+static void	force_slash(char *str, struct stat *st)
+{
+	if ((st->st_mode & S_IFMT) == S_IFDIR)
+		str[strlen(str)] = '/';
 }
 
 /*
 ** ? Error handling for paths > 155 or names > 100 ?
 ** if (split > 154 || strlen(path) > 255 || strlen(path) - split > 99)
 **	error("there's no room!")
-**
 ** Sets the tar_header addrss based on file given in path,
 ** zeros any unused space.
-**
 */
-void		path_to_tar_header(char *path, t_tar *tar)
+
+t_tar		*path_to_tar_header(char *path)
 {
-	int			split;
-	char		*tmp;
-	struct stat	my_stat;
+	int				split;
+	static t_tar	tar;
+	char			*tmp;
+	struct stat		my_stat;
 
-	split = last_slash(path) + 1;
-	bzero(stpncpy(tar->file_name_prefix, path, split), 155 - split);
-	strncpy(tar->file_name, path + split, 100);
 	stat(path, &my_stat);
-	snprintf(tar->file_mode, "6o ", my_stat.st_mode, 7);
-	snprintf(tar->owner_id, "6o ", my_stat.st_uid, 7);
-	snprintf(tar->group_id, "6o ", my_stat.st_gid, 7);
-	snprintf(tar->file_size, "11o ", my_stat.st_gid, 12);
-	snprintf(tar->last_mod_time, "11o ", my_stat.st_gid, 12);
-	snprintf(tar->checksum, "            ", my_stat.st_gid, 12);
-	tmp = ((my_sta);
-	if (tar->)
-
-
+	split = get_split(&path) + 1;
+	bzero(stpncpy(tar.file_name_prefix, path, split), 155 - split);
+	force_slash(strncpy(tar.file_name, path + split, 100), &my_stat);
+	snprintf(tar.file_mode, 8, "%06o ", my_stat.st_mode & 0777);
+	snprintf(tar.owner_id, 8, "%06o ", my_stat.st_uid);
+	snprintf(tar.group_id, 8, "%06o ", my_stat.st_gid);
+	snprintf(((char *)&tar) + 124, 13, "%011llo ", my_stat.st_size);
+	snprintf(((char *)&tar) + 136, 13, "%011lo ", my_stat.st_mtime);
+	snprintf(((char *)&tar) + 148, 9, "        ");
+	*tar.file_type = get_link(&my_stat, tar.name_of_link);
+	strncpy(stpncpy(((char *)&tar) + 257, "ustar", 6) + 1, "00", 2);
+	strncpy(tar.owner_user_name, getpwuid(my_stat.st_uid)->pw_name, 32);
+	strncpy(tar.owner_group_name, getgrgid(my_stat.st_gid)->gr_name, 32);
+	snprintf(tar.device_major_number, 8, "%06o ", my_stat.st_rdev >> 24);
+	snprintf(tar.device_minor_number, 8, "%06o ", my_stat.st_rdev & 0xFFFF);
+	bzero(tar.zeros, 12);
+	snprintf(tar.checksum, 7, "%06o", checksum(&tar));
+	tar.checksum[7] = ' ';
+	return (&tar);
 }
