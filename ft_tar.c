@@ -6,7 +6,7 @@
 /*   By: jtaylor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/15 23:39:47 by jtaylor           #+#    #+#             */
-/*   Updated: 2020/02/16 11:57:45 by jtaylor          ###   ########.fr       */
+/*   Updated: 2020/02/16 20:16:35 by jtaylor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,25 +24,32 @@
 static void	ft_tar_get_options(t_ft_tar *tar, int ac, char **argv)
 {
 	int		c;
+	int		arg_offset;
 
+	arg_offset = 1;
 	while ((c = getopt(ac, argv, "xcvf:tp")) != -1)
 	{
 		if (c == 'x')
-			tar->opt_x += 1;
+			tar->opt_x = 1;
 		else if (c == 'c')
-			tar->opt_c += 1;
+			tar->opt_c = 1;
 		else if (c == 'v')
-			tar->opt_v += 1;
+			tar->opt_v = 1;
 		else if (c == 'f')
 		{
-			tar->opt_f += 1;
+			tar->opt_f = 1;
 			tar->opt_f_target = optarg;
 		}
 		else if (c == 't')
-			tar->opt_t += 1;
+			tar->opt_t = 1;
 		else if (c == 'p')
-			tar->opt_p += 1;
+			tar->opt_p = 1;
 	}
+	while (argv[arg_offset] && argv[arg_offset][0] == '-')
+		arg_offset += 1;
+	if (tar->opt_f)
+		arg_offset++;
+	tar->argv = argv + arg_offset;
 }
 
 static inline void ft_init_tar_struct_options(t_ft_tar *tar)
@@ -56,6 +63,7 @@ static inline void ft_init_tar_struct_options(t_ft_tar *tar)
 	tar->opt_f_target = 0;
 }
 
+/*
 static void		test_print_options(t_ft_tar *tar)
 {
 	printf("opt_x = %d,\
@@ -69,13 +77,21 @@ static void		test_print_options(t_ft_tar *tar)
 			tar->opt_f, tar->opt_t, tar->opt_p,
 			tar->opt_f_target);
 }
+*/
+
+/*
+** insert the logic for going to either the archive handle
+** or the uynarchive handle
+*/
 
 int		main(int ac, char **argv)
 {
 	t_ft_tar		tar;
 
 	ft_init_tar_struct_options(&tar);
-	tar.argv = argv;
 	ft_tar_get_options(&tar, ac, argv);
-	test_print_options(&tar);
+	//test_print_options(&tar);
+	// move this to the logic
+	if (tar.opt_x || tar.opt_t)
+		untar_handle(&tar);
 }
