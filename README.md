@@ -1,5 +1,6 @@
 # ft_tar
 A rudimentary implementation for the classic command tar
+written by Jackson Taylor and Zachary Kubli
 ##
 There are a lot of issues with this code , a few segfualts and infinite loops here and there ,
 Mostly this is just a way to explore the tar command and how the tape archiver actually works .
